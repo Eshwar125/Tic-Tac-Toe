@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: Arial, sans-serif;
+            position: relative;
+            flex-direction: column;
+        }
+        .container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+        }
+        .scoreboard {
+            width: 150px;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .x-score {
+            color: red;
+        }
+        .o-score {
+            color: blue;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 0;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            background: #fff;
+            border: 2px solid black;
+            transition: background 0.3s;
+        }
+        .cell:hover {
+            background: #ddd;
+        }
+        .win {
+            background: lightgreen !important;
+        }
+        .message {
+            margin-top: 20px;
+            color: white;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        .restart {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background: #ff6b6b;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+        .restart:hover {
+            background: #ff4757;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 2em;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe</h1>
+    <div class="container">
+        <div class="scoreboard x-score">X Wins: <span id="xWins">0</span></div>
+        <div>
+            <div class="board" id="board"></div>
+            <div class="message" id="message"></div>
+        </div>
+        <div class="scoreboard o-score">O Wins: <span id="oWins">0</span></div>
+    </div>
+    <button class="restart" onclick="restartGame()">Restart Game</button>
+    <div class="popup" id="popup"></div>
+    
+    <script>
+        let xWins = 0;
+        let oWins = 0;
+        const board = document.getElementById("board");
+        const message = document.getElementById("message");
+        const xWinsDisplay = document.getElementById("xWins");
+        const oWinsDisplay = document.getElementById("oWins");
+        const popup = document.getElementById("popup");
+        let cells = [];
+        let currentPlayer = "X";
+        let gameBoard = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+
+        function createBoard() {
+            board.innerHTML = "";
+            gameBoard.forEach((cell, index) => {
+                const div = document.createElement("div");
+                div.classList.add("cell");
+                div.dataset.index = index;
+                div.addEventListener("click", handleClick);
+                board.appendChild(div);
+                cells[index] = div;
+            });
+        }
+
+        function handleClick(event) {
+            const index = event.target.dataset.index;
+            if (!gameBoard[index] && gameActive) {
+                gameBoard[index] = currentPlayer;
+                event.target.textContent = currentPlayer;
+                event.target.style.color = currentPlayer === "X" ? "red" : "blue";
+                checkWinner();
+                currentPlayer = currentPlayer === "X" ? "O" : "X";
+            }
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            for (let pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (gameBoard[a] && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    gameActive = false;
+                    message.textContent = `${gameBoard[a]} Wins!`;
+                    popup.textContent = `${gameBoard[a]} Wins! 🎉`;
+                    popup.style.display = "block";
+                    setTimeout(() => popup.style.display = "none", 3000);
+                    if (gameBoard[a] === "X") {
+                        xWins++;
+                        xWinsDisplay.textContent = xWins;
+                    } else {
+                        oWins++;
+                        oWinsDisplay.textContent = oWins;
+                    }
+                    pattern.forEach(index => cells[index].classList.add("win"));
+                    return;
+                }
+            }
+            if (!gameBoard.includes("")) {
+                message.textContent = "It's a Draw!";
+                gameActive = false;
+            }
+        }
+
+        function restartGame() {
+            gameBoard = ["", "", "", "", "", "", "", "", ""];
+            gameActive = true;
+            currentPlayer = "X";
+            message.textContent = "";
+            createBoard();
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
